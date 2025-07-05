@@ -50,4 +50,10 @@ A full-stack application that listens to GitHub Webhooks for **Push**, **Pull Re
 ---
 
 ## 🗂️ Project Structure
-
+webhook-repo/
+│
+├── app.py # Flask backend
+├── .env # MongoDB URI (keep secret!)
+├── requirements.txt # Python dependencies
+├── templates/
+│ └── index.html # Frontend UI
