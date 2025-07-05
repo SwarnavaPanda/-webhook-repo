@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GitHub Events Dashboard</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
+      margin: 0;
+      padding: 40px;
+    }
+
+    h2 {
+      text-align: center;
+      font-size: 2rem;
+      color: #333;
+      margin-bottom: 30px;
+    }
+
+    #eventList {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 0;
+      list-style: none;
+    }
+
+    li {
+      background: #ffffff;
+      padding: 15px 20px;
+      margin-bottom: 15px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      transition: transform 0.2s ease;
+    }
+
+    li:hover {
+      transform: translateY(-4px);
+    }
+
+    #loadMoreBtn {
+      display: none;
+      margin: 30px auto 0;
+      padding: 10px 20px;
+      font-size: 1rem;
+      background-color: #4a90e2;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    #loadMoreBtn:hover {
+      background-color: #357ABD;
+    }
+
+    #seeLessFooter {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 15px;
+      background-color: rgba(0, 0, 0, 0.6);
+      text-align: center;
+    }
+
+    #seeLessFooter button {
+      background-color: #ffffff;
+      color: #333;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    #seeLessFooter button:hover {
+      background-color: #e6e6e6;
+    }
+  </style>
+</head>
+<body>
+  <h2>Latest GitHub Events</h2>
+  <ul id="eventList"></ul>
+  <button id="loadMoreBtn">See More</button>
+
+  <!-- Transparent Footer with "See Less" -->
+  <div id="seeLessFooter">
+    <button id="seeLessBtn">See Less</button>
+  </div>
+
+  <script>
+    let allEvents = [];
+    let shownCount = 0;
+    const pageSize = 10;
+
+    function formatEvent(e) {
+      const { author, action_type, from_branch, to_branch, timestamp } = e;
+      if (action_type === "push") {
+        return `${author} pushed to ${to_branch} on ${timestamp}`;
+      } else if (action_type === "pull_request") {
+        return `${author} submitted a pull request from ${from_branch} to ${to_branch} on ${timestamp}`;
+      } else if (action_type === "merge") {
+        return `${author} merged branch ${from_branch} to ${to_branch} on ${timestamp}`;
+      } else {
+        return `${author} performed ${action_type} on ${timestamp}`;
+      }
+    }
+
+    function renderEvents(showAll = false) {
+      const list = document.getElementById('eventList');
+      list.innerHTML = '';
+      shownCount = showAll ? allEvents.length : pageSize;
+
+      const visibleEvents = allEvents.slice(0, shownCount);
+      visibleEvents.forEach(event => {
+        const li = document.createElement('li');
+        li.innerText = formatEvent(event);
+        list.appendChild(li);
+      });
+
+      const loadMoreBtn = document.getElementById('loadMoreBtn');
+      const seeLessFooter = document.getElementById('seeLessFooter');
+
+      if (allEvents.length > pageSize && !showAll) {
+        loadMoreBtn.style.display = 'block';
+        seeLessFooter.style.display = 'none';
+      } else if (allEvents.length > pageSize && showAll) {
+        loadMoreBtn.style.display = 'none';
+        seeLessFooter.style.display = 'block';
+      } else {
+        loadMoreBtn.style.display = 'none';
+        seeLessFooter.style.display = 'none';
+      }
+    }
+
+    function fetchEvents() {
+      fetch('/events')
+        .then(res => res.json())
+        .then(data => {
+          allEvents = data.reverse(); // newest last
+          renderEvents(false); // render only first 10
+        });
+    }
+
+    // Initial load
+    fetchEvents();
+    setInterval(fetchEvents, 15000);
+
+    // Load more shows all
+    document.getElementById('loadMoreBtn').addEventListener('click', () => renderEvents(true));
+
+    // See less goes back to first 10
+    document.getElementById('seeLessBtn').addEventListener('click', () => renderEvents(false));
+  </script>
+</body>
+</html>
