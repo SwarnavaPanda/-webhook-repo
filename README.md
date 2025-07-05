@@ -2,7 +2,6 @@
 
 A full-stack application that listens to GitHub Webhooks for **Push**, **Pull Request**, and **Merge** actions, and stores them in **MongoDB**. A sleek frontend dashboard automatically fetches and displays the latest events every 15 seconds with pagination and smooth user interactions.
 
-![Screenshot](https://via.placeholder.com/900x500.png?text=GitHub+Webhook+Dashboard) <!-- Replace with actual screenshot URL -->
 
 ---
 
